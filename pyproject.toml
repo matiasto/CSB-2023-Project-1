@@ -8,6 +8,10 @@ packages = [{include = "vulnerable_blog", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
+flask = "^3.0.0"
+invoke = "^2.2.0"
+pylint = "^3.0.3"
+autopep8 = "^2.0.4"
 
 
 [build-system]
