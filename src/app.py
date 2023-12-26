@@ -141,3 +141,8 @@ def delete_post(post_id):
 if __name__ == '__main__':
     # Vulnerability: Security Misconfiguration - Debug mode should not be enabled in production (Security Misconfiguration - A05)
     app.run(debug=True)
+    # Fixed flaw A05: Correct application configuration
+    # if os.getenv('FLASK_ENV') == 'development':
+    #     app.run(debug=True)
+    # else:
+    #     app.run()
