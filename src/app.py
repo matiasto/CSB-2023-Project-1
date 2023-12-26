@@ -1,8 +1,14 @@
 from flask import Flask, request, render_template, redirect, url_for, session
+# from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 
 app = Flask(__name__)
+# Vulnerability: Weak Session Management - Session cookie is not set to secure (Identification and Authentication Failures - A07)
 app.secret_key = 'your_secret_key'
+# Fixed flaw A07: Secure session management
+# app.secret_key = os.urandom(24)  # Strong, random secret key
+# app.permanent_session_lifetime = timedelta(hours=1)  # Session expiration
+
 
 # Main page displaying all blog posts
 
