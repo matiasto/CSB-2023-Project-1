@@ -39,6 +39,10 @@ def register():
         # Vulnerability: Storing passwords in plain text (Cryptographic Failures - A02)
         cursor.execute(
             f"INSERT INTO users (username, password) VALUES ('{username}', '{password}')")
+        # Fixed flaw A02: Implementing password hashing
+        # hashed_password = generate_password_hash(password)
+        # cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, hashed_password))
+
         conn.commit()
         conn.close()
         return redirect(url_for('login'))
