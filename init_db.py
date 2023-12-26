@@ -6,6 +6,8 @@ def main():
 
     cursor = conn.cursor()
 
+    # Cryptographic Failures (A02): We are storing user passwords in plain text in the users table. 
+    # Passwords should always be hashed and salted to protect them in case the database is compromised.
     cursor.execute('''
     CREATE TABLE users (
         id INTEGER PRIMARY KEY,
