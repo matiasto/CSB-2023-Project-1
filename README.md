@@ -1,6 +1,28 @@
 # Cyber Security Base 2023 - Project I
 status: draft
 
+## Getting started
+1. Clone the repository
+```bash
+git clone <url>
+```
+2. Install poetry
+```bash
+pip install poetry
+```
+3. Install dependencies
+```bash
+poetry install
+```
+4. Initialize the database
+```bash 
+poetry run invoke db_init
+```
+5. Run the application
+```bash
+poetry run python app.py
+```
+
 ## Project description
 This is a simple web application that contains five security flaws from the OWASP top ten list. The application is written in Python using the Flask framework. The application is a simple blog where users can create posts and comment on them. The application is vulnerable to the following security flaws:
 

@@ -2,6 +2,11 @@ from invoke import task
 
 
 @task
+def init(ctx):
+    ctx.run("python3 init_db.py", pty=True)
+
+
+@task
 def start(ctx):
     ctx.run("python3 src/app.py", pty=True)
 

@@ -1,6 +1,8 @@
-from flask import Flask
+from flask import Flask, request, render_template, redirect, url_for, session
+import sqlite3
 
 app = Flask(__name__)
+app.secret_key = 'your_secret_key'
 
 
 @app.route('/')

@@ -4,7 +4,7 @@ version = "0.1.0"
 description = ""
 authors = ["Matias Tolppanen <matias.tolppanen@outlook.com>"]
 readme = "README.md"
-packages = [{include = "vulnerable_blog", from = "src"}]
+packages = [{include = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
