@@ -2,6 +2,8 @@ from flask import Flask, request, render_template, redirect, url_for, session
 # from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 
+############################
+
 app = Flask(__name__)
 # Vulnerability: Weak Session Management - Session cookie is not set to secure (Identification and Authentication Failures - A07)
 app.secret_key = 'your_secret_key'
@@ -9,10 +11,9 @@ app.secret_key = 'your_secret_key'
 # app.secret_key = os.urandom(24)  # Strong, random secret key
 # app.permanent_session_lifetime = timedelta(hours=1)  # Session expiration
 
+############################
 
 # Main page displaying all blog posts
-
-
 @app.route('/')
 def index():
     if 'user_id' in session:
@@ -26,8 +27,6 @@ def index():
         return render_template('index.html')
 
 # User registration handling
-
-
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -35,6 +34,8 @@ def register():
         password = request.form['password']
         conn = sqlite3.connect('blog.db')
         cursor = conn.cursor()
+
+        ############################
 
         # Vulnerability: Storing passwords in plain text (Cryptographic Failures - A02)
         # Vulnerability: SQL Injection via string concatenation (Injection - A03)
@@ -47,14 +48,14 @@ def register():
         # Fixed flaw A03: Prevention of SQL Injection via parameterized queries
         # cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
 
+        ############################
+
         conn.commit()
         conn.close()
         return redirect(url_for('login'))
     return render_template('register.html')
 
 # User login handling
-
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -63,14 +64,20 @@ def login():
         conn = sqlite3.connect('blog.db')
         cursor = conn.cursor()
 
+        ############################
+
         # Vulnerability: SQL Injection via string concatenation (Injection - A03)
         cursor.execute(
             f"SELECT id FROM users WHERE username = '{username}' AND password = '{password}'")
         # Fixed flaw A03: Prevention of SQL Injection via parameterized queries
         # cursor.execute("SELECT id FROM users WHERE username = ? AND password = ?", (username, password))
 
+        ############################
+
         user = cursor.fetchone()
         conn.close()
+
+        ############################
 
         if user:
             # Weak Session Management: Using predictable data as session token (Identification and Authentication Failures - A07)
@@ -78,19 +85,21 @@ def login():
             return redirect(url_for('index'))
         else:
             return 'Login Failed'
+        
+        # Fixed flaw A07: Secure session management
+        # See Line 8
+        
+        ############################
+
     return render_template('login.html')
 
 # User logout handling
-
-
 @app.route('/logout')
 def logout():
     session.pop('user_id', None)
     return redirect(url_for('index'))
 
 # Handling creation of new blog posts
-
-
 @app.route('/create_post', methods=['GET', 'POST'])
 def create_post():
     if 'user_id' not in session:
@@ -101,19 +110,23 @@ def create_post():
         author_id = session['user_id']
         conn = sqlite3.connect('blog.db')
         cursor = conn.cursor()
+
+        ############################
+
         # Vulnerability: SQL Injection via string concatenation (Injection - A03)
         cursor.execute(
             f"INSERT INTO posts (title, content, author_id) VALUES ('{title}', '{content}', {author_id})")
         # Fixed flaw A03: Prevention of SQL Injection via parameterized queries
         # cursor.execute("INSERT INTO posts (title, content, author_id) VALUES (?, ?, ?)", (title, content, author_id))
+
+        ############################
+
         conn.commit()
         conn.close()
         return redirect(url_for('index'))
     return render_template('create_post.html')
 
 # Handling editing of blog posts
-
-
 @app.route('/edit_post/<int:post_id>', methods=['GET', 'POST'])
 def edit_post(post_id):
     if 'user_id' not in session:
@@ -124,12 +137,26 @@ def edit_post(post_id):
         title = request.form['title']
         content = request.form['content']
 
+        ############################
+
         # Vulnerability: Broken Access Control - Any user can edit any post (Broken Access Control - A01)
         # Vulnerability: SQL Injection via string concatenation (Injection - A03)
         cursor.execute(
             f"UPDATE posts SET title = '{title}', content = '{content}' WHERE id = {post_id}")
+        # Fixed flaw A01: Enforcing Access Control
+        # cursor.execute("SELECT author_id FROM posts WHERE id = ?", (post_id,))
+        # post_author_id = cursor.fetchone()
+        # if post_author_id and session['user_id'] == post_author_id[0]:
+        #     cursor.execute("UPDATE posts SET title = ?, content = ? WHERE id = ?", (title, content, post_id))
+        # else:
+        #     Access denied
+
+
         # Fixed flaw A03: Prevention of SQL Injection via parameterized queries
         # cursor.execute("UPDATE posts SET title = ?, content = ? WHERE id = ?", (title, content, post_id))
+
+        ############################
+
         conn.commit()
         conn.close()
         return redirect(url_for('index'))
@@ -139,8 +166,6 @@ def edit_post(post_id):
     return render_template('edit_post.html', post=post, post_id=post_id)
 
 # Handling deletion of blog posts
-
-
 @app.route('/delete_post/<int:post_id>', methods=['POST'])
 def delete_post(post_id):
     if 'user_id' not in session:
@@ -148,17 +173,33 @@ def delete_post(post_id):
     conn = sqlite3.connect('blog.db')
     cursor = conn.cursor()
 
+    ############################
+
     # Vulnerability: Broken Access Control - Any user can delete any post (Broken Access Control - A01)
     # Vulnerability: SQL Injection via string concatenation (Injection - A03)
     cursor.execute(f"DELETE FROM posts WHERE id = {post_id}")
+    # Fixed flaw A01: Enforcing Access Control
+    # cursor.execute("SELECT author_id FROM posts WHERE id = ?", (post_id,))
+    # post_author_id = cursor.fetchone()
+    # if post_author_id and session['user_id'] == post_author_id[0]:
+    #     cursor.execute("DELETE FROM posts WHERE id = ?", (post_id,))
+    # else:
+    #     Access denied
+
     # Fixed flaw A03: Prevention of SQL Injection via parameterized queries
     # cursor.execute("DELETE FROM posts WHERE id = ?", (post_id,))
+
+    ############################
+
     conn.commit()
     conn.close()
     return redirect(url_for('index'))
 
 
 if __name__ == '__main__':
+
+    ############################
+
     # Vulnerability: Security Misconfiguration - Debug mode should not be enabled in production (Security Misconfiguration - A05)
     app.run(debug=True)
     # Fixed flaw A05: Correct application configuration
@@ -166,3 +207,5 @@ if __name__ == '__main__':
     #     app.run(debug=True)
     # else:
     #     app.run()
+
+    ############################
