@@ -1,0 +1,6 @@
+{% for post in posts %}
+    <h2>{{ post[1] }}</h2>
+    <p>{{ post[2] }}</p>
+{% else %}
+    <p>No posts yet!</p>
+{% endfor %}

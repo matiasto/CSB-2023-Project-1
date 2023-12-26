@@ -7,7 +7,12 @@ app.secret_key = 'your_secret_key'
 
 @app.route('/')
 def index():
-    return 'Hello, World!'
+    conn = sqlite3.connect('blog.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, title, content FROM posts")
+    posts = cursor.fetchall()
+    conn.close()
+    return render_template('index.html', posts=posts)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -51,6 +56,28 @@ def login():
             return 'Login Failed'
 
     return render_template('login.html')
+
+
+@app.route('/create_post', methods=['GET', 'POST'])
+def create_post():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        title = request.form['title']
+        content = request.form['content']
+        author_id = session['user_id']
+
+        conn = sqlite3.connect('blog.db')
+        cursor = conn.cursor()
+        cursor.execute(
+            f"INSERT INTO posts (title, content, author_id) VALUES ('{title}', '{content}', {author_id})")
+        conn.commit()
+        conn.close()
+
+        return redirect(url_for('index'))
+
+    return render_template('create_post.html')
 
 
 # Security Misconfiguration (A05): Leave debug mode on in production, exposing sensitive information.
