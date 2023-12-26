@@ -37,11 +37,15 @@ def register():
         cursor = conn.cursor()
 
         # Vulnerability: Storing passwords in plain text (Cryptographic Failures - A02)
+        # Vulnerability: SQL Injection via string concatenation (Injection - A03)
         cursor.execute(
             f"INSERT INTO users (username, password) VALUES ('{username}', '{password}')")
         # Fixed flaw A02: Implementing password hashing
         # hashed_password = generate_password_hash(password)
         # cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, hashed_password))
+
+        # Fixed flaw A03: Prevention of SQL Injection via parameterized queries
+        # cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
 
         conn.commit()
         conn.close()
@@ -62,6 +66,9 @@ def login():
         # Vulnerability: SQL Injection via string concatenation (Injection - A03)
         cursor.execute(
             f"SELECT id FROM users WHERE username = '{username}' AND password = '{password}'")
+        # Fixed flaw A03: Prevention of SQL Injection via parameterized queries
+        # cursor.execute("SELECT id FROM users WHERE username = ? AND password = ?", (username, password))
+
         user = cursor.fetchone()
         conn.close()
 
@@ -94,8 +101,11 @@ def create_post():
         author_id = session['user_id']
         conn = sqlite3.connect('blog.db')
         cursor = conn.cursor()
+        # Vulnerability: SQL Injection via string concatenation (Injection - A03)
         cursor.execute(
             f"INSERT INTO posts (title, content, author_id) VALUES ('{title}', '{content}', {author_id})")
+        # Fixed flaw A03: Prevention of SQL Injection via parameterized queries
+        # cursor.execute("INSERT INTO posts (title, content, author_id) VALUES (?, ?, ?)", (title, content, author_id))
         conn.commit()
         conn.close()
         return redirect(url_for('index'))
@@ -115,8 +125,11 @@ def edit_post(post_id):
         content = request.form['content']
 
         # Vulnerability: Broken Access Control - Any user can edit any post (Broken Access Control - A01)
+        # Vulnerability: SQL Injection via string concatenation (Injection - A03)
         cursor.execute(
             f"UPDATE posts SET title = '{title}', content = '{content}' WHERE id = {post_id}")
+        # Fixed flaw A03: Prevention of SQL Injection via parameterized queries
+        # cursor.execute("UPDATE posts SET title = ?, content = ? WHERE id = ?", (title, content, post_id))
         conn.commit()
         conn.close()
         return redirect(url_for('index'))
@@ -136,7 +149,10 @@ def delete_post(post_id):
     cursor = conn.cursor()
 
     # Vulnerability: Broken Access Control - Any user can delete any post (Broken Access Control - A01)
+    # Vulnerability: SQL Injection via string concatenation (Injection - A03)
     cursor.execute(f"DELETE FROM posts WHERE id = {post_id}")
+    # Fixed flaw A03: Prevention of SQL Injection via parameterized queries
+    # cursor.execute("DELETE FROM posts WHERE id = ?", (post_id,))
     conn.commit()
     conn.close()
     return redirect(url_for('index'))
