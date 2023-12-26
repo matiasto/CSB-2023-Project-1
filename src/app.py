@@ -80,6 +80,33 @@ def create_post():
     return render_template('create_post.html')
 
 
+@app.route('/edit_post/<int:post_id>', methods=['GET', 'POST'])
+def edit_post(post_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    conn = sqlite3.connect('blog.db')
+    cursor = conn.cursor()
+
+    if request.method == 'POST':
+        title = request.form['title']
+        content = request.form['content']
+
+        # Intentionally vulnerable: No access control check
+        cursor.execute(
+            f"UPDATE posts SET title = '{title}', content = '{content}' WHERE id = {post_id}")
+        conn.commit()
+        conn.close()
+
+        return redirect(url_for('index'))
+
+    cursor.execute(f"SELECT title, content FROM posts WHERE id = {post_id}")
+    post = cursor.fetchone()
+    conn.close()
+
+    return render_template('edit_post.html', post=post, post_id=post_id)
+
+
 # Security Misconfiguration (A05): Leave debug mode on in production, exposing sensitive information.
 if __name__ == '__main__':
     app.run(debug=True)
