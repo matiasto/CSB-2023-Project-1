@@ -107,6 +107,22 @@ def edit_post(post_id):
     return render_template('edit_post.html', post=post, post_id=post_id)
 
 
+@app.route('/delete_post/<int:post_id>', methods=['POST'])
+def delete_post(post_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    conn = sqlite3.connect('blog.db')
+    cursor = conn.cursor()
+
+    # Intentionally vulnerable: No access control check
+    cursor.execute(f"DELETE FROM posts WHERE id = {post_id}")
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for('index'))
+
+
 # Security Misconfiguration (A05): Leave debug mode on in production, exposing sensitive information.
 if __name__ == '__main__':
     app.run(debug=True)
