@@ -4,7 +4,7 @@ status: draft
 ## Getting started
 1. Clone the repository
 ```bash
-git clone <url>
+git clone https://github.com/matiasto/CSB-2023-Project-1.git
 ```
 2. Install poetry
 ```bash
